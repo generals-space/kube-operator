@@ -2,6 +2,10 @@
 
 ## 前言
 
+生成的代码已经加入代码库, 如要验证生成步骤, 可见上一个commit.
+
+------
+
 本项目使用[code-generator](https://github.com/kubernetes/code-generator)生成CRD的代码(不先生成代码的话本项目无法直接运行), 需要事先准备好当前的目录结构, 主要为
 
 1. `pkg/apis/kubegroup/v1/doc.go`
