@@ -29,7 +29,7 @@ type PodClusterSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// Foo is an example field of PodCluster. Edit PodCluster_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	PodReplicas int32 `json:"podReplicas"`
 }
 
 // PodClusterStatus defines the observed state of PodCluster
