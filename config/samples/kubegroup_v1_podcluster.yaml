@@ -1,0 +1,7 @@
+apiVersion: kubegroup.generals.space/v1
+kind: PodCluster
+metadata:
+  name: podcluster-sample
+spec:
+  # Add fields here
+  foo: bar
