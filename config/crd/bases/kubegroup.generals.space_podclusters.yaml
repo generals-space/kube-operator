@@ -1,0 +1,59 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.2.5
+  creationTimestamp: null
+  name: podclusters.kubegroup.generals.space
+spec:
+  group: kubegroup.generals.space
+  names:
+    kind: PodCluster
+    listKind: PodClusterList
+    plural: podclusters
+    singular: podcluster
+  scope: Namespaced
+  validation:
+    openAPIV3Schema:
+      description: PodCluster is the Schema for the podclusters API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: PodClusterSpec defines the desired state of PodCluster
+          properties:
+            podReplicas:
+              description: Foo is an example field of PodCluster. Edit PodCluster_types.go
+                to remove/update
+              format: int32
+              type: integer
+          required:
+          - podReplicas
+          type: object
+        status:
+          description: PodClusterStatus defines the observed state of PodCluster
+          type: object
+      type: object
+  version: v1
+  versions:
+  - name: v1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
