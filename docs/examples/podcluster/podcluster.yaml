@@ -1,0 +1,7 @@
+note: PodCluster Example
+sample: |
+  apiVersion: kubegroup.generals.space/v1
+  kind: PodCluster
+  metadata:
+    name: podcluster-example
+  spec:
