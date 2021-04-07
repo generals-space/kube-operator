@@ -1,0 +1,4 @@
+
+version: "1"
+domain: generals.space
+repo: generals-space/kube-operator
