@@ -6,3 +6,8 @@
 2. [02.crd-podcluster](../../tree/02.crd-podcluster)
     - 同名分支
     - 声明`PodCluster`类型的CRD资源, 通过`code-generator`生成代码, 附详细的操作方法.
+3. [03.crd-podcluster-kubebuilder](../../tree/03.crd-podcluster-kubebuilder)
+    - 同名分支
+    - 声明`PodCluster`类型的CRD资源, 通过`kubebuilder`生成代码, 附详细的操作方法.
+    - `Reconcile()`主方法
+    - `kustomize`工具生成`yaml`文件
