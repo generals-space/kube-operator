@@ -23,6 +23,7 @@ type PodCluster struct {
 
 // PodClusterSpec defines the desired state of PodCluster
 type PodClusterSpec struct {
+	PodReplicas int32 `json:"podReplicas"`
 }
 
 // PodClusterStatus defines the observed state of PodCluster
