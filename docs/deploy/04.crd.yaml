@@ -1,0 +1,13 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: podcluster.kubegroup.generals.space
+spec:
+  group: kubegroup.generals.space
+  names:
+    kind: PodCluster
+    listKind: PodClusterList
+    plural: podcluster
+    singular: podcluster
+  scope: Namespaced
+  version: v1

@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: podcluster-apiserver
+  namespace: kube-system
+  labels:
+    api: podcluster-apiserver
+    apiserver: "true"
+spec:
+  selector:
+    matchLabels:
+      api: podcluster-apiserver
+      apiserver: "true"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        api: podcluster-apiserver
+        apiserver: "true"
+    spec:
+      containers:
+      - name: centos7
+        image: registry.cn-hangzhou.aliyuncs.com/generals-space/centos7
+        volumeMounts:
+        - mountPath: /etc/kubernetes/pki
+          name: k8s-certs
+          readOnly: true
+        - mountPath: /etc/kubernetes/pki/etcd
+          name: etcd-certs
+          readOnly: true
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: k8s-certs-cfg
+        name: k8s-certs
+      - configMap:
+          defaultMode: 420
+          name: etcd-certs-cfg
+        name: etcd-certs

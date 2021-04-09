@@ -1,0 +1,17 @@
+apiVersion: apiregistration.k8s.io/v1
+kind: APIService
+metadata:
+  name: v1.kubegroup.generals.space
+  labels:
+    api: podcluster-apiserver
+    apiserver: "true"
+spec:
+  version: v1
+  ## 这里的`group`是加上(init repo时)`--domain`部分的字符串.
+  group: kubegroup.generals.space
+  groupPriorityMinimum: 2000
+  service:
+    name: podcluster-apiserver
+    namespace: kube-system
+  versionPriority: 10
+  insecureSkipTLSVerify: true

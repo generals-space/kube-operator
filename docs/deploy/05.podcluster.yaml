@@ -1,0 +1,8 @@
+apiVersion: kubegroup.generals.space/v1
+kind: PodCluster
+metadata:
+  name: podcluster-sample
+  namespace: kube-system
+spec:
+  # Add fields here
+  podReplicas: 2

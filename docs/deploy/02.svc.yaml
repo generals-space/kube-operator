@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: podcluster-apiserver
+  namespace: kube-system
+  labels:
+    api: podcluster-apiserver
+    apiserver: "true"
+spec:
+  ports:
+  - port: 443
+    protocol: TCP
+    targetPort: 1443
+  selector:
+    api: podcluster-apiserver
+    apiserver: "true"
