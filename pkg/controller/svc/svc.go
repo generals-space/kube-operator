@@ -5,6 +5,7 @@ import (
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/informers"
@@ -42,7 +43,27 @@ func New(kubeClient *kubernetes.Clientset) *SvcController {
 func (c *SvcController) Start(stopCh chan struct{}) {
 	klog.Infof("初始化 service informer...")
 	// Shared指的是多个 lister 共享同一个cache, 而且资源的变化会同时通知到cache和listers.
-	factory := informers.NewSharedInformerFactory(c.kubeClient, time.Second*60)
+
+	resync := time.Second * 60
+	// 如下是为监听资源添加过滤选项的3种方法(第1, 2种已经注释掉了)
+	// 第1种
+	// factory := informers.NewSharedInformerFactory(c.kubeClient, resync)
+
+	// listWatchOption 最终会被加工成 List() 或 Watch() 方法可接受的参数类型, 
+	// 如 client.CoreV1().Pods(namespace).List(options)
+	listWatchOption := func(opt *metav1.ListOptions) {
+		labelSet := labels.Set(map[string]string{
+			"k8s-app": "kube-dns",
+		})
+		opt.LabelSelector = labels.SelectorFromSet(labelSet).String()
+	}
+	// 第2种
+	// filterOpts := informers.WithTweakListOptions(listWatchOption)
+	// factory := informers.NewSharedInformerFactoryWithOptions(c.kubeClient, resync, filterOpts)
+	
+	// 第3种
+	factory := informers.NewFilteredSharedInformerFactory(c.kubeClient, resync, "kube-system", listWatchOption)
+
 	// factory 初始时是没有监听任何资源的, 只有在获取某一种资源的 Informer 时(比如 Node),
 	// 才会调用 factory.InformerFor(&corev1.Service{}) 将其加入到监听列表,
 	// 然后调用 Start() 和 WaitForCacheSync() 才有意义.
@@ -76,9 +97,9 @@ func (c *SvcController) Start(stopCh chan struct{}) {
 	// 应该只是展示一下通过informer的接口得到list资源的方法.
 	svcLister := cmInformer.Lister()
 	// 从 lister 中获取所有 items
-	nodeList, err := svcLister.List(labels.Everything())
+	svcList, err := svcLister.List(labels.Everything())
 	if err != nil {
 		klog.Errorf("获取主机列表失败: %s", err)
 	}
-	klog.Infof("获取主机列表: %+v", nodeList)
+	klog.Infof("获取主机列表: %+v", svcList)
 }
