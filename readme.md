@@ -2,9 +2,7 @@
 
 kuber: 1.16.2
 
-可以说, 这个示例就是最简的 controller 了, 不需要创建 CRD 资源和对应的 golang 对象(包含 GVK, Spec, Status等), 只监听 kuber 内置的资源对象(本工程中为`Node`主机资源)的变动.
-
-`informer`存在的意义就是, 在kuber集群各组件在与apiserver进行通信时添加一个中间缓存层, 减轻apiserver的负载压力. `informer`内置缓存功能, 可保证与apiserver查询到的数据保持一致.
+分别使用`informers.NewSharedInformerFactory()`和`cache.NewSharedIndexInformer()`两个方法, 对`Service`和`Pod`资源进行监听, 实现的效果基本相同.
 
 ## 运行
 
