@@ -11,3 +11,7 @@
     - 声明`PodCluster`类型的CRD资源, 通过`kubebuilder`生成代码, 附详细的操作方法.
     - `Reconcile()`主方法
     - `kustomize`工具生成`yaml`文件
+4. [04.informer-factory](../../tree/03.crd-podcluster-kubebuilder)
+    - 同名分支
+    - `informers.NewSharedInformerFactory()`和`cache.NewSharedIndexInformer()`两个方法, 对Service和Pod资源进行监听, 实现的效果基本相同.
+    - 简要描述了两种`informer`的关系.
