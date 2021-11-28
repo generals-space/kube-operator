@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
+	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -21,19 +22,23 @@ import (
 */
 
 func onAdd(obj interface{}) {
-	node := obj.(*corev1.Node)
-	klog.Infof("add a node:%+v", node.Name)
+	pod := obj.(*corev1.Pod)
+	klog.Infof("add a pod: %+v", pod.Name)
 }
 
 // onUpdate // 此处省略 workqueue 的使用
 func onUpdate(oldObj interface{}, newObj interface{}) {
-	klog.Infof("update a node")
-	klog.Infof("old object: %+v\n", oldObj)
-	klog.Infof("new object: %+v\n", newObj)
+	klog.Infof("update a pod")
+	oldPod := oldObj.(*corev1.Pod)
+	newPod := newObj.(*corev1.Pod)
+
+	klog.Infof("old pod: %+v\n", oldPod.Name)
+	klog.Infof("new pod: %+v\n", newPod.Name)
 }
 
 func onDelete(obj interface{}) {
-	klog.Infof("delete a node")
+	pod := obj.(*corev1.Pod)
+	klog.Infof("delete a pod: +v", pod.Name)
 }
 
 func main() {
@@ -54,16 +59,16 @@ func main() {
 
 	klog.Infof("初始化 informer...")
 	// Shared指的是多个 lister 共享同一个cache, 而且资源的变化会同时通知到cache和listers.
-	factory := informers.NewSharedInformerFactory(clientset, 0)
+	factory := informers.NewSharedInformerFactory(clientset, 60 * time.Second)
 
-	// nodeInformer 拥有两个方法: Informer, Lister.
+	// podInformer 拥有两个方法: Informer, Lister.
 	// 其实可以把 Informer 看作是 watch 操作.
-	nodeInformer := factory.Core().V1().Nodes()
-	informer := nodeInformer.Informer()
+	podInformer := factory.Core().V1().Pods()
+	informer := podInformer.Informer()
 	defer runtime.HandleCrash()
 
-	// 启动 informer, 开始 list & watch 流程
-	go factory.Start(stopCh)
+	// 启动 informer, 开始 list & watch 流程(不需要使用 go func() 模式)
+	factory.Start(stopCh)
 
 	// 从 apiserver 同步某种资源的全部对象, 即 list.
 	// 之后就可以使用watch这种资源, 维护这份缓存.
@@ -84,13 +89,16 @@ func main() {
 
 	// 从informer对象创建lister, 不过这里的代码没有特殊的目的,
 	// 应该只是展示一下通过informer的接口得到list资源的方法.
-	nodeLister := nodeInformer.Lister()
+	podLister := podInformer.Lister()
 	// 从 lister 中获取所有 items
-	nodeList, err := nodeLister.List(labels.Everything())
+	podList, err := podLister.List(labels.Everything())
 	if err != nil {
-		klog.Errorf("获取主机列表失败: %s", err)
+		klog.Errorf("获取Pod列表失败: %s", err)
 	}
-	klog.Infof("获取主机列表: %+v", nodeList)
+	klog.Infof("获取Pod列表")
+	for _, pod := range podList {
+		klog.Infof("%s", pod.Name)
+	}
 
 	<-stopCh
 }
