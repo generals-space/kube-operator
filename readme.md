@@ -15,3 +15,7 @@
     - 同名分支
     - `informers.NewSharedInformerFactory()`和`cache.NewSharedIndexInformer()`两个方法, 对Service和Pod资源进行监听, 实现的效果基本相同.
     - 简要描述了两种`informer`的关系.
+5. [05.node-pod-indexer](../../tree/05.node-pod-indexer)
+    - 同名分支
+    - 介绍了Indexer索引器的原理及使用方法.
+    - 实现了按主机名称对 pod 列表进行索引查询, 即查询指定主机上的 Pod 列表.
