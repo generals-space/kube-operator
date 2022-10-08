@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: test-sts
+  labels:
+    app: test-sts
+  namespace: default
+spec:
+  serviceName: test-sts-svc
+  selector:
+    matchLabels:
+      app: test-sts
+  template:
+    metadata:
+      labels:
+        app: test-sts
+    spec:
+      containers:
+      - name: centos7
+        image: registry.cn-hangzhou.aliyuncs.com/generals-space/centos:7
+        imagePullPolicy: IfNotPresent
+        command: ["tail", "-f", "/etc/os-release"]
+      ## 允许在master节点部署
+      tolerations:
+      ## 这一段表示pod需要容忍拥有master角色的node们,
+      ## 且这个污点的效果是 NoSchedule.
+      ## 因为key, operator, value, effect可以唯一确定一个污点对象(Taint).
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
