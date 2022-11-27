@@ -19,3 +19,10 @@
     - 同名分支
     - 介绍了Indexer索引器的原理及使用方法.
     - 实现了按主机名称对 pod 列表进行索引查询, 即查询指定主机上的 Pod 列表.
+6. [rest-client](../../tree/rest-client)
+    - client-go rest-client 的使用方法, 直接构造 http 请求, 自主选择目标资源路径.
+7. [create-from-yaml](../../tree/create-from-yaml)
+    - 读入 yaml 文件, 构造 Object 对象创建资源
+8. [http-watch-api](../../tree/http-watch-api)
+    - 同名分支
+    - 实现了trunk接口的 server 端, 可以通过 curl 该接口实现 watch 的效果.
