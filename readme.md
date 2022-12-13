@@ -27,4 +27,4 @@
 10. [docker-api](../../tree/docker-api)
     - 实现了`docker ps`, `docker images`的功能;
     - 基于 kubelet 引用到的[kubernetes-sigs/cri-tools](https://github.com/kubernetes-sigs/cri-tools)库实现;
-
+    - dockershim grpc 服务调用方式;
