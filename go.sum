@@ -728,8 +728,6 @@ k8s.io/api v0.17.2 h1:NF1UFXcKN7/OOv1uxdRz3qfra8AHsPav5M93hlV9+Dc=
 k8s.io/api v0.17.2/go.mod h1:BS9fjjLc4CMuqfSO8vgbHPKMt5+SF0ET6u/RVDihTo4=
 k8s.io/apiextensions-apiserver v0.17.2 h1:cP579D2hSZNuO/rZj9XFRzwJNYb41DbNANJb6Kolpss=
 k8s.io/apiextensions-apiserver v0.17.2/go.mod h1:4KdMpjkEjjDI2pPfBA15OscyNldHWdBCfsWMDWAmSTs=
-k8s.io/apimachinery v0.17.2 h1:hwDQQFbdRlpnnsR64Asdi55GyCaIP/3WQpMmbNBeWr4=
-k8s.io/apimachinery v0.17.2/go.mod h1:b9qmWdKlLuU9EBh+06BtLcSf/Mu89rWL33naRxs1uZg=
 k8s.io/apiserver v0.17.2 h1:NssVvPALll6SSeNgo1Wk1h2myU1UHNwmhxV0Oxbcl8Y=
 k8s.io/apiserver v0.17.2/go.mod h1:lBmw/TtQdtxvrTk0e2cgtOxHizXI+d0mmGQURIHQZlo=
 k8s.io/cli-runtime v0.17.2/go.mod h1:aa8t9ziyQdbkuizkNLAw3qe3srSyWh9zlSB7zTqRNPI=
@@ -742,8 +740,6 @@ k8s.io/cluster-bootstrap v0.17.2/go.mod h1:qiazpAM05fjAc+PEkrY8HSUhKlJSMBuLnVUSO
 k8s.io/code-generator v0.17.2/go.mod h1:DVmfPQgxQENqDIzVR2ddLXMH34qeszkKSdH/N+s+38s=
 k8s.io/component-base v0.17.2 h1:0XHf+cerTvL9I5Xwn9v+0jmqzGAZI7zNydv4tL6Cw6A=
 k8s.io/component-base v0.17.2/go.mod h1:zMPW3g5aH7cHJpKYQ/ZsGMcgbsA/VyhEugF3QT1awLs=
-k8s.io/cri-api v0.17.2 h1:79i4T9cRV2vpzaNFQfFO5gCl6x8LEgxMJk1amJDYncQ=
-k8s.io/cri-api v0.17.2/go.mod h1:BzAkbBHHp81d+aXzbiIcUbilLkbXa40B8mUHOk6EX3s=
 k8s.io/csi-translation-lib v0.17.2 h1:/3Q+LtA/EqPnKjNol/YpsYw0gEWPKC/tZl9hkiumWVc=
 k8s.io/csi-translation-lib v0.17.2/go.mod h1:NrhnhXJg/V6cHRTdPbmxvBuV3rJSqXsdLBE5JSRzcVI=
 k8s.io/gengo v0.0.0-20190128074634-0689ccc1d7d6/go.mod h1:ezvh/TsK7cY6rbqRK0oQQ8IAqLxYwwyPxAX1Pzy0ii0=
@@ -763,8 +759,6 @@ k8s.io/kube-scheduler v0.17.2/go.mod h1:BlP/p3YDLgsEIshEj4gbGjV11j4BQjNx7vbwRcLG
 k8s.io/kubectl v0.17.2/go.mod h1:y4rfLV0n6aPmvbRCqZQjvOp3ezxsFgpqL+zF5jH/lxk=
 k8s.io/kubelet v0.17.2 h1:AggINdoeh58BjlM8oWy9XPLcWde8MIs44+/HJpyfPi0=
 k8s.io/kubelet v0.17.2/go.mod h1:XUOu5Fcnkx44FP13w5etBrn2GhK4D02CUcFA8tLtUKU=
-k8s.io/kubernetes v1.17.2 h1:g1UFZqFQsYx88xMUks4PKC6tsNcekxe0v06fcVGRwVE=
-k8s.io/kubernetes v1.17.2/go.mod h1:NbNV+69yL3eKiKDJ+ZEjqOplN3BFXKBeunzkoOy8WLo=
 k8s.io/legacy-cloud-providers v0.17.2/go.mod h1:a/qbE67VbTzWOemWfqH0wlcX31zxt4UOxFqZuBltY9Q=
 k8s.io/metrics v0.17.2/go.mod h1:3TkNHET4ROd+NfzNxkjoVfQ0Ob4iZnaHmSEA4vYpwLw=
 k8s.io/repo-infra v0.0.1-alpha.1/go.mod h1:wO1t9WaB99V80ljbeENTnayuEEwNZt7gECYh/CEyOJ8=

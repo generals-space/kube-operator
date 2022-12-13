@@ -1,0 +1,8 @@
+{
+    "go.gopath": "/usr/local/gopath",
+    "go.toolsEnvVars": {
+        "GOPATH": "/usr/local/gopath",
+        "GOPROXY": "https://goproxy.cn",
+        "GO111MODULE": "auto"
+    }
+}

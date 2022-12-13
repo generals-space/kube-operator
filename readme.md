@@ -9,6 +9,115 @@
 
 执行时不需要事先部署 kubelet, 只要有docker即可, 直接运行.
 
+## docker 与 kubernetes 的关系
+
+### docker + kubernetes.v1.24-(1.24之前 )
+
+```
+                                  +-----------+   
+                                  |  kubelet  |   
+                                  +-----┬-----+   
+                                        |         
+                              +---------↓--------+
+                              |  GenericRuntime  |
+                              +---------┬--------+
+                          ┌─────────────┴─────────────┐ 
+                    +-----↓------+              +----------+ 
+                    | dockershim |              | cri-shim | 
+                    +-----┬------+              +-----┬----+ 
+                          |                           |
+                          |              +------------------------+
+                          |              | containerd |    rkt    |
+                          |              +------------------------+
+                          |
++----------+        +-----↓-----+ grpc  +-----------+
+|docker-cli| -----> |  dockerd  | ----> | containerd|
++----------+        +-----------+       +-----┬-----+
+                                              | exec
+                                    ┌─────────┴─────────┐
+                            +-------↓-------+   +-------↓-------+
+                            |containerd-shim|   |containerd-shim|
+                            +-------┬-------+   +-------┬-------+
+                                    | exec              | exec
+                              +-----↓-----+       +-----↓-----+
+                              |    runc   |       |    runc   |
+                              +-----------+       +-----------+
+```
+
+最开始, kubernetes 是与 docker 强绑定的, kubelet 与 dockerd 直接通信.
+
+后来出现了 docker 以外的其他 runtime, 如 runv, rkt. 
+
+2016年, kubernetes 官方发布了 cri 接口规范, 规范所有运行时接口. 但此时 docker 也发布了 swarm, 进行容器编排. 一个由下往下, 一个由下向上, 都向对方发起正义的背刺😂.
+
+docker 没有理会这个 cri, kubernetes 官方只能自己写了个`dockershim`包, 给 docker 服务提供了 cri 适配. 
+
+kubelet 在启动时, 会先创建与 dockerd 服务(/var/run/docker.sock)的连接对象. 然后启动名为 dockershim 的 grpc server, kubelet 对容器的各种操作, 都是向该 grpc server 发出请求(就是调用 grpc 服务中提供的 Service 的函数), dockershim 服务会将请求转发给 dockerd.
+
+`GenericRuntime`是一个通用接口, 可以与任何实现了 cri 接口的 runtime 通信, 我们可以自行指定一个其他实现了 CRI 接口的 runtime, 把 dockerd 替换掉.
+
+### docker + kubernetes.v1.24+(1.24及之后)
+
+```
+                                                        +-----------+   
+                                                        |  kubelet  |   
+                                                        +-----┬-----+   
+                                                              |         
+                                                    +---------↓--------+
+                                                    |  GenericRuntime  |
+                                                    +---------┬--------+
+                                              ┌───────────────┴───────────────┐
+                                              |                               |
++----------+        +-----------+ grpc  +-----↓-----+            +------------↓-----------+
+|docker-cli| -----> |  dockerd  | ----> | containerd|            |   xxxxxx   |    rkt    |
++----------+        +-----------+       +-----┬-----+            +------------------------+
+                                              | exec
+                                    ┌─────────┴─────────┐
+                            +-------↓-------+   +-------↓-------+
+                            |containerd-shim|   |containerd-shim|
+                            +-------┬-------+   +-------┬-------+
+                                    | exec              | exec
+                              +-----↓-----+       +-----↓-----+
+                              |    runc   |       |    runc   |
+                              +-----------+       +-----------+
+```
+
+1.24的修改, 其实就是把 dockershim 从 kubelet 源码中移除了, 直接与 containerd 服务进行通信(因为 containerd 实现了 CRI), 不再让 dockerd 这中间商赚差价了.
+
+可以说, kubernetes 发达后, 就一脚把 docker 踹开了. 倒是 containerd 是 docker 开源的, 捐给 CNCF 组织后, 实现了 CRI, 也有点格局大了的意思.
+
+也可以手动指定其他实现了 cri 接口的容器运行时, 如 containerd
+
+## dockershim grpc 服务
+
+dockershim 是一个 GRPC 服务, ta 监听 /var/run/dockershim.sock 接口(类似于 http 端口), kubelet 在启动时会同时启动.
+
+**protobuf**
+
+[cri-api](https://github.com/kubernetes/cri-api)工程定义了 dockershim 提供的函数原型(protobuf).
+
+**Server**
+
+kubernetes:pkg/kubelet/dockershim/docker_service.go -> dockerService{} 定义了这个 grpc 的服务端处理函数.
+
+dockerService 中包含一个 client 成员对象, 这个对象是 dockershim 服务与 dockerd 服务(/var/run/docker.sock)通信的客户端, 在初始化时就会与 dockerd 建立连接.
+
+**client**
+
+kubernetes:pkg/kubelet/remote/remote_runtime.go -> [RemoteRuntimeService{}, RemoteImageService{}] 这2个结构体, 则定义了 grpc 的客户端函数. 
+
+kubelet 只通过这2个结构体与 dockerd 服务通信.
+
+```
+        |      GRPC client     |                   GRPC server                  |
+
+        ┌ RemoteRuntimeService ┐
+kubelet ┤                      ├──> dockershim.sock ──> dockerService ──> client ──> docker.sock ──> dockerd
+        └  RemoteImageService  ┘
+```
+
+## 运行日志
+
 ```log
 $ go run main.go
 I1002 19:36:07.343990    2837 client.go:75] Connecting to docker on unix:///var/run/docker.sock
@@ -35,7 +144,6 @@ I1002 19:36:07.395114    2837 clientconn.go:577] ClientConn switching balancer t
 2021-10-02 19:36:07.398316 I | container: kube-scheduler
 2021-10-02 19:36:07.398319 I | container: kube-apiserver
 2021-10-02 19:36:07.398322 I | container: kube-controller-manager
-2021-10-02 19:36:07.398325 I | container: etcd
 2021-10-02 19:36:07.398328 I | ============================= images
 2021-10-02 19:36:07.420746 I | container: [registry.cn-hangzhou.aliyuncs.com/generals-space/centos7-devops:latest]
 2021-10-02 19:36:07.420750 I | container: [registry.cn-hangzhou.aliyuncs.com/generals-kuber/crd-ipkeeper:0.0.84]
@@ -46,6 +154,5 @@ I1002 19:36:07.395114    2837 clientconn.go:577] ClientConn switching balancer t
 2021-10-02 19:36:07.420788 I | container: [registry.cn-hangzhou.aliyuncs.com/google_containers/kube-scheduler:v1.17.2]
 2021-10-02 19:36:07.420792 I | container: [registry.cn-hangzhou.aliyuncs.com/google_containers/coredns:1.6.5]
 2021-10-02 19:36:07.420796 I | container: [registry.cn-hangzhou.aliyuncs.com/google_containers/etcd:3.4.3-0]
-2021-10-02 19:36:07.420810 I | container: [registry.cn-hangzhou.aliyuncs.com/google_containers/etcd:3.3.15-0]
 2021-10-02 19:36:07.420824 I | container: [registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.1]
 ```

@@ -14,56 +14,45 @@ import (
 	"k8s.io/kubernetes/pkg/kubelet/server/streaming"
 )
 
+// getRuntimeAndImageServices 创建到 dockershim(grpc server)的客户端对象.
+//
+// 	@param remoteRuntimeEndpoint: unix:///var/run/dockershim.sock
+// 	@param remoteImageEndpoint: unix:///var/run/dockershim.sock
 func getRuntimeAndImageServices(
-	remoteRuntimeEndpoint string,
-	remoteImageEndpoint string,
+	remoteRuntimeEndpoint, remoteImageEndpoint string,
 	runtimeRequestTimeout metav1.Duration,
-) (internalapi.RuntimeService, internalapi.ImageManagerService, error) {
-	rs, err := remote.NewRemoteRuntimeService(
-		remoteRuntimeEndpoint,
-		runtimeRequestTimeout.Duration,
+) (rs internalapi.RuntimeService, is internalapi.ImageManagerService, err error) {
+	rs, err = remote.NewRemoteRuntimeService(
+		remoteRuntimeEndpoint, runtimeRequestTimeout.Duration,
 	)
 	if err != nil {
-		return nil, nil, err
+		return
 	}
-	is, err := remote.NewRemoteImageService(
-		remoteImageEndpoint,
-		runtimeRequestTimeout.Duration,
+	is, err = remote.NewRemoteImageService(
+		remoteImageEndpoint, runtimeRequestTimeout.Duration,
 	)
 	if err != nil {
-		return nil, nil, err
+		return
 	}
-	return rs, is, err
+	return
 }
 
 func main() {
 	// pkg/kubelet/kubelet.go -> NewMainKubelet()
 
 	pluginSettings := dockershim.NetworkPluginSettings{
-		// --hairpin-mode
-		HairpinMode: kubeletconfiginternal.HairpinMode("promiscuous-bridge"),
-		// --non-masquerade-cidr
-		NonMasqueradeCIDR: "10.0.0.0/8",
-		// --network-plugin
-		PluginName: "cni",
-		// --cni-conf-dir
-		PluginConfDir: "/etc/cni/net.d",
-		// --cni-bin-dir
-		PluginBinDirString: "/opt/cni/bin",
-		// --cni-cache-dir
-		PluginCacheDir: "/var/lib/cni/cache",
-		// --network-plugin-mtu
-		MTU: 1460,
+		HairpinMode: kubeletconfiginternal.HairpinMode( // --hairpin-mode
+			"promiscuous-bridge",
+		),
+		NonMasqueradeCIDR:  "10.0.0.0/8",         // --non-masquerade-cidr
+		PluginName:         "cni",                // --network-plugin
+		PluginConfDir:      "/etc/cni/net.d",     // --cni-conf-dir
+		PluginBinDirString: "/opt/cni/bin",       // --cni-bin-dir
+		PluginCacheDir:     "/var/lib/cni/cache", // --cni-cache-dir
+		MTU:                1460,                 // --network-plugin-mtu
 	}
 
-	// Create and start the CRI shim running as a grpc server.
-	streamingConfig := &streaming.Config{
-		// --streaming-connection-idle-timeout="4h0m0s"
-		StreamIdleTimeout:               time.Hour * 4,
-		StreamCreationTimeout:           streaming.DefaultConfig.StreamCreationTimeout,
-		SupportedRemoteCommandProtocols: streaming.DefaultConfig.SupportedRemoteCommandProtocols,
-		SupportedPortForwardProtocols:   streaming.DefaultConfig.SupportedPortForwardProtocols,
-	}
+	// 用于调用 docker 官方库, 创建与 dockerd 服务进行通信的客户端对象.
 	dockerClientConfig := &dockershim.ClientConfig{
 		// --docker-endpoint
 		DockerEndpoint: "unix:///var/run/docker.sock",
@@ -72,8 +61,19 @@ func main() {
 		// --image-pull-progress-deadline="1m0s"
 		ImagePullProgressDeadline: time.Second * 60,
 	}
+	// 这个也是用于与 dockerd 服务通信的, 主要实现 exec, logs 等请求.
+	//
+	// Create and start the CRI shim running as a grpc server.
+	streamingConfig := &streaming.Config{
+		// --streaming-connection-idle-timeout="4h0m0s"
+		StreamIdleTimeout:               time.Hour * 4,
+		StreamCreationTimeout:           streaming.DefaultConfig.StreamCreationTimeout,
+		SupportedRemoteCommandProtocols: streaming.DefaultConfig.SupportedRemoteCommandProtocols,
+		SupportedPortForwardProtocols:   streaming.DefaultConfig.SupportedPortForwardProtocols,
+	}
+
 	// kubernetes-v1.17.2 cmd/kubelet/app/options/container_runtime.go
-	podSandboxImage := "k8s.gcr.io/pause:3.1"
+	podSandboxImage := "registry.cn-hangzhou.aliyuncs.com/google_containers/pause/pause:3.1"
 	// --runtime-cgroups=""
 	runtimeCgroups := ""
 	// --cgroup-driver="systemd"
@@ -98,11 +98,16 @@ func main() {
 		return
 	}
 
-	// dockershim.sock 并不是 docker 自身生成的文件, 
+	// dockershim.sock 并不是 docker 自身生成的文件,
 	// 而是 kubelet 在启动时创建 grpc server 时创建的.
 	// --container-runtime-endpoint="unix:///var/run/dockershim.sock"
 	dockershimEP := "unix:///var/run/dockershim.sock"
 
+	// docker server 启动时, 会建立与 dockerd 服务(/var/run/docker.sock)的连接对象,
+	// 同时启动一个名为 dockershim grpc 服务, 该服务只提供2个 Service, 
+	// 即为下面的 runtimeService 与 imageService, 分别用于容器/镜像的操作.
+	//
+	// kubelet 调用这两个 Service 时, dockershim 会将请求转换为到 dockerd 的格式.
 	server := dockerremote.NewDockerServer(dockershimEP, ds)
 	if err := server.Start(); err != nil {
 		log.Printf("failed to start docker server: %s", err)
@@ -112,9 +117,7 @@ func main() {
 	// --runtime-request-timeout="2m0s"
 	runtimeRequestTimeout := metav1.Duration{time.Second * 120}
 	runtimeService, imageService, err := getRuntimeAndImageServices(
-		dockershimEP,
-		dockershimEP,
-		runtimeRequestTimeout,
+		dockershimEP, dockershimEP, runtimeRequestTimeout,
 	)
 	if err != nil {
 		log.Printf("failed to init grpc service: %s", err)
