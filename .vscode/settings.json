@@ -1,0 +1,4 @@
+{
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "java.configuration.maven.userSettings": "/usr/local/maven/conf/settings.xml"
+}

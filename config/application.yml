@@ -1,0 +1,8 @@
+server:
+  port: 80
+spring:
+  jackson:
+    ## get 请求返回 yaml 资源时, 不包含 null 字段
+    default-property-inclusion: non_null
+  ## 返回 kube 对象时会出现 json 解析异常, 需要指定解析器为 gson
+  mvc.converters.preferred-json-mapper: gson
