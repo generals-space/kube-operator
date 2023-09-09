@@ -28,3 +28,13 @@
     - 实现了`docker ps`, `docker images`的功能;
     - 基于 kubelet 引用到的[kubernetes-sigs/cri-tools](https://github.com/kubernetes-sigs/cri-tools)库实现;
     - dockershim grpc 服务调用方式;
+11. [java-client-patch-deployment](../../tree/java-client-patch-deployment)
+    - 实现了对目标集群中 deployment 资源的增删改查操作, 尤其是 labels 信息的修改, 提供了 http 接口.
+    - spring boot 工程
+    - kubernetes java client
+    - vscode 远程开发环境
+    - mvn package 构建 jar 包
+    - kube资源(deployment)更新方式, patch接口的使用
+    - 自定义json响应体 `ResponseData{status, message, data}`
+    - http接口全局异常捕获
+    - lombok 注解精简 getter/setter 方法
