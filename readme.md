@@ -38,3 +38,6 @@
     - 自定义json响应体 `ResponseData{status, message, data}`
     - http接口全局异常捕获
     - lombok 注解精简 getter/setter 方法
+12. [node-pod-indexer-kubebuilder](../../tree/node-pod-indexer-kubebuilder)
+    - 实现了在 kubebuilder 工程中, 按主机名称对 pod 列表进行索引查询, 即查询指定主机上的 Pod 列表;
+    - 功能上等同于示例 05.
